@@ -51,4 +51,8 @@ export const copilotAdapter: ToolAdapter = {
   instructionsPath(): string {
     return instructionsFile();
   },
+
+  scanPaths(): string[] {
+    return [copilotDir()];
+  },
 };

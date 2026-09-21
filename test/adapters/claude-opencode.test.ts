@@ -19,7 +19,7 @@ afterEach(() => {
   rmSync(fakeHome, { recursive: true, force: true });
 });
 
-describe("claude-code adapter", () => {
+describe("claude adapter", () => {
   test("reads mcp servers, agents, commands, skills, instructions", async () => {
     mkdirSync(join(fakeHome, ".claude", "agents"), { recursive: true });
     mkdirSync(join(fakeHome, ".claude", "commands"), { recursive: true });
@@ -33,7 +33,7 @@ describe("claude-code adapter", () => {
     writeFileSync(join(fakeHome, ".claude", "skills", "demo-skill", "SKILL.md"), "---\nname: demo-skill\n---\nbody");
     writeFileSync(join(fakeHome, ".claude", "CLAUDE.md"), "# notes");
 
-    const adapter = getAdapter("claude-code");
+    const adapter = getAdapter("claude");
     const mcp = await adapter.readMcpServers();
     expect(mcp["context7"]).toBeDefined();
 

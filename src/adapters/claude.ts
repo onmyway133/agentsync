@@ -11,8 +11,8 @@ const commandsDir = () => join(claudeDir(), "commands");
 const skillsDir = () => join(claudeDir(), "skills");
 const instructionsFile = () => join(claudeDir(), "CLAUDE.md");
 
-export const claudeCodeAdapter: ToolAdapter = {
-  id: "claude-code",
+export const claudeAdapter: ToolAdapter = {
+  id: "claude",
   displayName: "Claude Code",
   capabilities: { mcp: true, agents: true, commands: true, skills: true, instructions: true },
 
@@ -20,7 +20,7 @@ export const claudeCodeAdapter: ToolAdapter = {
     return readJsonMcpServers(claudeJson(), "mcpServers");
   },
   async writeMcpServers(entries: McpServerMap): Promise<void> {
-    writeJsonMcpServers("claude-code", claudeJson(), "mcpServers", entries);
+    writeJsonMcpServers("claude", claudeJson(), "mcpServers", entries);
   },
 
   async listAgents(): Promise<FileResource[]> {
@@ -46,5 +46,9 @@ export const claudeCodeAdapter: ToolAdapter = {
 
   instructionsPath(): string {
     return instructionsFile();
+  },
+
+  scanPaths(): string[] {
+    return [claudeDir(), claudeJson()];
   },
 };

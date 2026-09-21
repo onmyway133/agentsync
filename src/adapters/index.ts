@@ -1,4 +1,4 @@
-import { claudeCodeAdapter } from "./claude-code";
+import { claudeAdapter } from "./claude";
 import { codexAdapter } from "./codex";
 import { copilotAdapter } from "./copilot";
 import { cursorAdapter } from "./cursor";
@@ -7,7 +7,7 @@ import { opencodeAdapter } from "./opencode";
 import type { ToolAdapter } from "./types";
 
 export const adapters: ToolAdapter[] = [
-  claudeCodeAdapter,
+  claudeAdapter,
   codexAdapter,
   copilotAdapter,
   geminiAdapter,

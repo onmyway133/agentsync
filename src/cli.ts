@@ -5,6 +5,7 @@ import { runInit } from "./commands/init";
 import { runList } from "./commands/list";
 import { runPull } from "./commands/pull";
 import { runPush } from "./commands/push";
+import { runScan } from "./commands/scan";
 import { runStatus } from "./commands/status";
 import { runUpdate } from "./commands/update";
 import { log } from "./ui/logger";
@@ -43,6 +44,11 @@ program
   .option("--dry-run", "show what would change without writing anything")
   .option("--yes", "don't prompt on conflicts")
   .action((source: string | undefined, opts) => runUpdate(source, opts));
+
+program
+  .command("scan")
+  .description("Scan your home directory for installed AI coding tool configs")
+  .action(() => runScan());
 
 program
   .command("list")

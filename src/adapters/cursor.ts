@@ -44,4 +44,8 @@ export const cursorAdapter: ToolAdapter = {
   instructionsPath(): string {
     throw new Error("Cursor has no confirmed global instructions path");
   },
+
+  scanPaths(): string[] {
+    return [cursorDir()];
+  },
 };

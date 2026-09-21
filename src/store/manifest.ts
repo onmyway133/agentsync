@@ -3,7 +3,7 @@ import { MANIFEST_FILE, SOURCES_FILE } from "./paths";
 
 export interface ToolSource {
   type: "tool";
-  id: string; // adapter id, e.g. "claude-code"
+  id: string; // adapter id, e.g. "claude"
 }
 
 export interface GithubSource {

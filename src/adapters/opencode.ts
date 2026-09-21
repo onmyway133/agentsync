@@ -100,4 +100,8 @@ export const opencodeAdapter: ToolAdapter = {
   instructionsPath(): string {
     return instructionsFile();
   },
+
+  scanPaths(): string[] {
+    return [opencodeDir()];
+  },
 };

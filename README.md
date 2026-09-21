@@ -22,15 +22,17 @@ bun link   # exposes the `agentsync` command globally
 
 ```sh
 agentsync init                         # create the ~/.agentsync store
+agentsync scan                         # detect installed tool configs under your home dir
 agentsync pull <tool>                  # copy a tool's resources into the store
 agentsync pull github:<owner>/<repo>   # pull a Claude-Code-shaped repo into the store
+agentsync pull https://github.com/<owner>/<repo>  # same, full URL also accepted
 agentsync push <tool>                  # write the store's resources into a tool
 agentsync update [source]              # re-pull from one or all registered sources
 agentsync list                         # show registered sources + store contents
 agentsync status <tool>                # dry-run diff of store vs. a tool
 ```
 
-`<tool>` is one of: `claude-code`, `codex`, `copilot`, `gemini`, `opencode`, `cursor`.
+`<tool>` is one of: `claude`, `codex`, `copilot`, `gemini`, `opencode`, `cursor`.
 
 Flags on `pull`/`push`/`update`:
 
@@ -78,12 +80,28 @@ automatically.
 
 ```sh
 agentsync pull github:owner/repo
+agentsync pull https://github.com/owner/repo
+agentsync pull https://github.com/owner/repo/tree/some-branch
+agentsync pull git@github.com:owner/repo.git
 ```
 
-Expects the repo to already be laid out like a Claude Code config: `agents/`,
-`commands/`, `skills/`, a `.mcp.json` or `mcp-servers.json`, and an optional
-`CLAUDE.md`/`AGENTS.md`. Useful for pulling in someone else's published
-agents/commands/skills collection.
+All of these forms are accepted and normalized to `owner/repo` (plus an
+optional branch/ref) before cloning. Expects the repo to already be laid out
+like a Claude Code config: `agents/`, `commands/`, `skills/`, a `.mcp.json` or
+`mcp-servers.json`, and an optional `CLAUDE.md`/`AGENTS.md`. Useful for
+pulling in someone else's published agents/commands/skills collection.
+
+## Finding installed tools
+
+```sh
+agentsync scan
+```
+
+Looks for known config locations (`~/.claude`, `~/.codex`, `~/.copilot`,
+`~/.gemini`, `~/.config/opencode`, `~/.cursor`) and reports which tools are
+installed, how many resources of each type they hold, and whether they're
+already registered as an agentsync source — a quick way to see what you could
+`agentsync pull` next.
 
 ## Development
 

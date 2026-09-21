@@ -41,7 +41,7 @@ export interface ToolCapabilities {
 }
 
 export interface ToolAdapter {
-  /** Stable identifier used on the CLI, e.g. "claude-code" */
+  /** Stable identifier used on the CLI, e.g. "claude" */
   id: string;
   displayName: string;
   capabilities: ToolCapabilities;
@@ -68,6 +68,14 @@ export interface ToolAdapter {
 
   /** Absolute path to the tool's global instructions/memory file. */
   instructionsPath(): string;
+
+  /**
+   * Absolute paths whose presence on disk indicates this tool has been
+   * installed/used (config dir and/or top-level config file). Used by
+   * `agentsync scan` to detect which tools have local config; existence of
+   * any one path counts as "detected".
+   */
+  scanPaths(): string[];
 }
 
 export const MARKER_START = "<!-- agentsync:start -->";

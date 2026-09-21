@@ -62,4 +62,8 @@ export const codexAdapter: ToolAdapter = {
   instructionsPath(): string {
     return instructionsFile();
   },
+
+  scanPaths(): string[] {
+    return [codexDir()];
+  },
 };

@@ -45,4 +45,8 @@ export const geminiAdapter: ToolAdapter = {
   instructionsPath(): string {
     return instructionsFile();
   },
+
+  scanPaths(): string[] {
+    return [geminiDir()];
+  },
 };
