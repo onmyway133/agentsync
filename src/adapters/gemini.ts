@@ -1,18 +1,24 @@
 import { join } from "node:path";
+import { listMarkdownResources, listSkillResources, markdownResourcePath, skillResourcePath } from "./common";
 import { home } from "./home";
 import { readJsonMcpServers, writeJsonMcpServers } from "./json-mcp";
 import type { FileResource, McpServerMap, SkillResource, ToolAdapter } from "./types";
 
 const geminiDir = () => join(home(), ".gemini");
 const settingsJson = () => join(geminiDir(), "settings.json");
+const agentsDir = () => join(geminiDir(), "agents");
+const skillsDir = () => join(geminiDir(), "skills");
 const instructionsFile = () => join(geminiDir(), "GEMINI.md");
 
 export const geminiAdapter: ToolAdapter = {
   id: "gemini",
   displayName: "Gemini CLI",
-  // Gemini custom commands are TOML-based and global support is unconfirmed,
-  // so commands are not synced yet (see README "known gaps").
-  capabilities: { mcp: true, agents: false, commands: false, skills: false, instructions: true },
+  // Gemini subagents (~/.gemini/agents/*.md, YAML frontmatter) and skills
+  // (~/.gemini/skills/<name>/SKILL.md) are the same shape as Claude Code's,
+  // so they sync directly. Gemini custom commands are TOML-based (different
+  // shape from the store's markdown commands), so they're not synced yet
+  // (see README "known gaps").
+  capabilities: { mcp: true, agents: true, commands: false, skills: true, instructions: true },
 
   async readMcpServers(): Promise<McpServerMap> {
     return readJsonMcpServers(settingsJson(), "mcpServers");
@@ -22,10 +28,10 @@ export const geminiAdapter: ToolAdapter = {
   },
 
   async listAgents(): Promise<FileResource[]> {
-    return [];
+    return listMarkdownResources(agentsDir());
   },
-  agentPath(): string {
-    throw new Error("Gemini CLI does not support subagents");
+  agentPath(name: string): string {
+    return markdownResourcePath(agentsDir(), name);
   },
 
   async listCommands(): Promise<FileResource[]> {
@@ -36,10 +42,10 @@ export const geminiAdapter: ToolAdapter = {
   },
 
   async listSkills(): Promise<SkillResource[]> {
-    return [];
+    return listSkillResources(skillsDir());
   },
-  skillPath(): string {
-    throw new Error("Gemini CLI does not support skills");
+  skillPath(name: string): string {
+    return skillResourcePath(skillsDir(), name);
   },
 
   instructionsPath(): string {

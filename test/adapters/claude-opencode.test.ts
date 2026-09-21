@@ -51,6 +51,35 @@ describe("claude adapter", () => {
   });
 });
 
+describe("gemini adapter", () => {
+  test("reads mcp servers, agents, skills, instructions (no commands)", async () => {
+    mkdirSync(join(fakeHome, ".gemini", "agents"), { recursive: true });
+    mkdirSync(join(fakeHome, ".gemini", "skills", "demo-skill"), { recursive: true });
+    writeFileSync(
+      join(fakeHome, ".gemini", "settings.json"),
+      JSON.stringify({ mcpServers: { context7: { command: "npx", args: ["-y", "context7"] } } }),
+    );
+    writeFileSync(join(fakeHome, ".gemini", "agents", "reviewer.md"), "---\nname: reviewer\n---\nbody");
+    writeFileSync(join(fakeHome, ".gemini", "skills", "demo-skill", "SKILL.md"), "---\nname: demo-skill\n---\nbody");
+    writeFileSync(join(fakeHome, ".gemini", "GEMINI.md"), "# notes");
+
+    const adapter = getAdapter("gemini");
+    expect(adapter.capabilities.commands).toBe(false);
+
+    const mcp = await adapter.readMcpServers();
+    expect(mcp["context7"]).toBeDefined();
+
+    const agents = await adapter.listAgents();
+    expect(agents.map((a) => a.name)).toEqual(["reviewer"]);
+
+    const skills = await adapter.listSkills();
+    expect(skills.map((s) => s.name)).toEqual(["demo-skill"]);
+
+    const instructions = readFileSync(adapter.instructionsPath(), "utf8");
+    expect(instructions).toContain("# notes");
+  });
+});
+
 describe("opencode adapter mcp shape conversion", () => {
   test("round-trips a stdio server through OpenCode's native shape", async () => {
     const adapter = getAdapter("opencode");

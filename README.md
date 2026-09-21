@@ -63,7 +63,7 @@ Flags on `pull`/`push`/`update`:
 | **Claude Code** | `~/.claude.json` → `mcpServers` | `~/.claude/agents/*.md` | `~/.claude/commands/*.md` | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/CLAUDE.md` |
 | **Codex CLI** | `~/.codex/config.toml` → `[mcp_servers.<name>]` | ❌ | `~/.codex/prompts/*.md` | ❌ | `~/.codex/AGENTS.md` |
 | **Copilot CLI** | `~/.copilot/mcp-config.json` → `mcpServers` | `~/.copilot/agents/<name>/AGENT.md` | ❌ | `~/.copilot/skills/<name>/SKILL.md` | `~/.copilot/copilot-instructions.md` |
-| **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` | ❌ | ❌ (global support unconfirmed) | ❌ | `~/.gemini/GEMINI.md` |
+| **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` | `~/.gemini/agents/*.md` | ❌ (`.toml` format, not yet synced) | `~/.gemini/skills/<name>/SKILL.md` | `~/.gemini/GEMINI.md` |
 | **OpenCode** | `~/.config/opencode/opencode.json` → `mcp` | `~/.config/opencode/agent/*.md` | `~/.config/opencode/command/*.md` | `~/.config/opencode/skill/<name>/SKILL.md` | `~/.config/opencode/AGENTS.md` |
 | **Cursor** | `~/.cursor/mcp.json` → `mcpServers` | ❌ | ❌ | ❌ | ❌ (no confirmed global file) |
 
