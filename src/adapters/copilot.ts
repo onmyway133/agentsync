@@ -8,13 +8,14 @@ const copilotDir = () => join(home(), ".copilot");
 const mcpConfig = () => join(copilotDir(), "mcp-config.json");
 const agentsDir = () => join(copilotDir(), "agents");
 const skillsDir = () => join(copilotDir(), "skills");
+const instructionsFile = () => join(copilotDir(), "copilot-instructions.md");
 
 export const copilotAdapter: ToolAdapter = {
   id: "copilot",
   displayName: "GitHub Copilot CLI",
-  // No confirmed user-level slash command directory, and no confirmed
-  // user-level instructions file (only repo-level .github/copilot-instructions.md).
-  capabilities: { mcp: true, agents: true, commands: false, skills: true, instructions: false },
+  // No confirmed user-level slash command directory. User-level instructions
+  // are supported at $HOME/.copilot/copilot-instructions.md.
+  capabilities: { mcp: true, agents: true, commands: false, skills: true, instructions: true },
 
   async readMcpServers(): Promise<McpServerMap> {
     return readJsonMcpServers(mcpConfig(), "mcpServers");
@@ -48,6 +49,6 @@ export const copilotAdapter: ToolAdapter = {
   },
 
   instructionsPath(): string {
-    throw new Error("Copilot CLI has no confirmed user-level instructions file");
+    return instructionsFile();
   },
 };
