@@ -14,4 +14,4 @@ export const STORE_MCP_FILE = join(STORE_DIR, "mcp-servers.json");
 export const STORE_AGENTS_DIR = join(STORE_DIR, "agents");
 export const STORE_COMMANDS_DIR = join(STORE_DIR, "commands");
 export const STORE_SKILLS_DIR = join(STORE_DIR, "skills");
-export const STORE_INSTRUCTIONS_FILE = join(STORE_DIR, "instructions", "AGENTSYNC.md");
+export const STORE_INSTRUCTIONS_FILE = join(STORE_DIR, "instructions", "AGENTS.md");

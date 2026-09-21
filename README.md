@@ -44,7 +44,7 @@ Flags on `pull`/`push`/`update`:
 
 - **Store**: `~/.agentsync/store/` holds the canonical copies, shaped like
   Claude Code's format (`agents/*.md`, `commands/*.md`, `skills/<name>/SKILL.md`,
-  `mcp-servers.json`, `instructions/AGENTSYNC.md`).
+  `mcp-servers.json`, `instructions/AGENTS.md`).
 - **MCP servers** are merged into each tool's existing config file by key —
   your other settings in that file are left untouched. `manifest.json` tracks
   which keys agentsync owns per tool.
