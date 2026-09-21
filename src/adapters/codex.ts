@@ -1,7 +1,7 @@
 import * as TOML from "@iarna/toml";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { listMarkdownResources, markdownResourcePath } from "./common";
+import { listMarkdownResources, listSkillResources, markdownResourcePath, skillResourcePath } from "./common";
 import { home } from "./home";
 import type { FileResource, McpServerMap, SkillResource, ToolAdapter } from "./types";
 import { getOwnedMcpKeys, setOwnedMcpKeys } from "../store/manifest";
@@ -11,6 +11,7 @@ import { ensureDir } from "../store/files";
 const codexDir = () => join(home(), ".codex");
 const configToml = () => join(codexDir(), "config.toml");
 const promptsDir = () => join(codexDir(), "prompts");
+const skillsDir = () => join(codexDir(), "skills");
 const instructionsFile = () => join(codexDir(), "AGENTS.md");
 
 function readConfig(): Record<string, unknown> {
@@ -21,7 +22,10 @@ function readConfig(): Record<string, unknown> {
 export const codexAdapter: ToolAdapter = {
   id: "codex",
   displayName: "Codex CLI",
-  capabilities: { mcp: true, agents: false, commands: true, skills: false, instructions: true },
+  // Codex subagents (~/.codex/agents/<name>.toml) exist but use a TOML shape
+  // (model, approval_policy, sandbox_mode, ...) incompatible with the store's
+  // Claude-shaped markdown+frontmatter agents; not yet synced.
+  capabilities: { mcp: true, agents: false, commands: true, skills: true, instructions: true },
 
   async readMcpServers(): Promise<McpServerMap> {
     const config = readConfig();
@@ -52,11 +56,12 @@ export const codexAdapter: ToolAdapter = {
     return markdownResourcePath(promptsDir(), name);
   },
 
+  // Codex skills (~/.codex/skills/<name>/SKILL.md) use the same shape as Claude's.
   async listSkills(): Promise<SkillResource[]> {
-    return [];
+    return listSkillResources(skillsDir());
   },
-  skillPath(): string {
-    throw new Error("Codex CLI does not support skills");
+  skillPath(name: string): string {
+    return skillResourcePath(skillsDir(), name);
   },
 
   instructionsPath(): string {
