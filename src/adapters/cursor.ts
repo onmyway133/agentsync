@@ -7,15 +7,17 @@ import type { FileResource, McpServerMap, SkillResource, ToolAdapter } from "./t
 const cursorDir = () => join(home(), ".cursor");
 const mcpJson = () => join(cursorDir(), "mcp.json");
 const agentsDir = () => join(cursorDir(), "agents");
+const commandsDir = () => join(cursorDir(), "commands");
 const skillsDir = () => join(cursorDir(), "skills");
 
 export const cursorAdapter: ToolAdapter = {
   id: "cursor",
   displayName: "Cursor",
-  // Cursor subagents (~/.cursor/agents/*.md) and skills (~/.cursor/skills/<name>/SKILL.md)
-  // now use the same shape as Claude Code. Slash commands and global instructions are
-  // still project-scoped only (.cursor/rules/*.mdc), no confirmed global path.
-  capabilities: { mcp: true, agents: true, commands: false, skills: true, instructions: false },
+  // Cursor subagents (~/.cursor/agents/*.md), commands (~/.cursor/commands/*.md),
+  // and skills (~/.cursor/skills/<name>/SKILL.md) all use the same shape as Claude
+  // Code. Global instructions are still project-scoped only (.cursor/rules/*.mdc),
+  // no confirmed global path.
+  capabilities: { mcp: true, agents: true, commands: true, skills: true, instructions: false },
 
   async readMcpServers(): Promise<McpServerMap> {
     return readJsonMcpServers(mcpJson(), "mcpServers");
@@ -32,10 +34,10 @@ export const cursorAdapter: ToolAdapter = {
   },
 
   async listCommands(): Promise<FileResource[]> {
-    return [];
+    return listMarkdownResources(commandsDir());
   },
-  commandPath(): string {
-    throw new Error("Cursor does not support slash commands");
+  commandPath(name: string): string {
+    return markdownResourcePath(commandsDir(), name);
   },
 
   async listSkills(): Promise<SkillResource[]> {
