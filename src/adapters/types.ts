@@ -40,11 +40,27 @@ export interface ToolCapabilities {
   instructions: boolean;
 }
 
+/**
+ * For tools whose slash-command file format differs from the store's plain
+ * markdown (e.g. Gemini CLI's TOML `{ description, prompt }`), the adapter
+ * provides bidirectional content conversion instead of relying on a symlink
+ * (a symlink can't reconcile two different file formats). When set, commands
+ * are synced as independently-written, content-hash-compared copies.
+ */
+export interface CommandsConversion {
+  /** Convert this tool's native command file content into store-shaped markdown. */
+  toStore(native: string): string;
+  /** Convert store-shaped markdown content into this tool's native format. */
+  toNative(storeContent: string): string;
+}
+
 export interface ToolAdapter {
   /** Stable identifier used on the CLI, e.g. "claude" */
   id: string;
   displayName: string;
   capabilities: ToolCapabilities;
+  /** Set only when this tool's command format needs conversion, not a symlink. */
+  commandsConversion?: CommandsConversion;
 
   /** Read all MCP servers currently configured for this tool. */
   readMcpServers(): Promise<McpServerMap>;

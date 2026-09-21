@@ -1,13 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { listMarkdownFiles, listSubdirectories } from "../store/files";
+import { listFilesWithExt, listSubdirectories } from "../store/files";
 import { log } from "../ui/logger";
 import type { FileResource, SkillResource } from "./types";
 
-export function listMarkdownResources(dirPath: string): FileResource[] {
+/** List file resources with a given extension (e.g. "md", "toml") in a directory. */
+export function listResourcesWithExt(dirPath: string, ext: string): FileResource[] {
   const resources: FileResource[] = [];
-  for (const name of listMarkdownFiles(dirPath)) {
-    const filePath = join(dirPath, `${name}.md`);
+  for (const name of listFilesWithExt(dirPath, ext)) {
+    const filePath = join(dirPath, `${name}.${ext}`);
     try {
       resources.push({ name, content: readFileSync(filePath, "utf8") });
     } catch (err) {
@@ -16,6 +17,14 @@ export function listMarkdownResources(dirPath: string): FileResource[] {
     }
   }
   return resources;
+}
+
+export function resourcePathWithExt(dirPath: string, name: string, ext: string): string {
+  return join(dirPath, `${name}.${ext}`);
+}
+
+export function listMarkdownResources(dirPath: string): FileResource[] {
+  return listResourcesWithExt(dirPath, "md");
 }
 
 export function markdownResourcePath(dirPath: string, name: string): string {

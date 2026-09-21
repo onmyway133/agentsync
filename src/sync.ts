@@ -87,21 +87,30 @@ async function pullFileResources(
     log.skip(`${type}: nothing to pull`);
     return;
   }
+  const conversion = type === "commands" ? adapter.commandsConversion : undefined;
   ensureDir(storeDir);
   for (const resource of resources) {
     const toolPath = type === "agents" ? adapter.agentPath(resource.name) : adapter.commandPath(resource.name);
     const storePath = join(storeDir, `${resource.name}.md`);
 
-    if (isSymlinkTo(toolPath, storePath)) {
+    if (!conversion && isSymlinkTo(toolPath, storePath)) {
       log.skip(`${type}/${resource.name}: already synced`);
       continue;
     }
 
+    // When the tool's native format differs from the store's markdown (e.g.
+    // Gemini's TOML commands), compare/store the *converted* content instead
+    // of the raw native bytes, and materialize a copy instead of a symlink.
+    const converted = conversion ? conversion.toStore(resource.content) : resource.content;
     const storeContent = readFileIfExists(storePath);
-    if (storeContent !== null && hashContent(storeContent) !== hashContent(resource.content)) {
+    if (storeContent !== null && hashContent(storeContent) === hashContent(converted)) {
+      log.skip(`${type}/${resource.name}: already synced`);
+      continue;
+    }
+    if (storeContent !== null) {
       const choice = options.yes
         ? "keep-tool"
-        : await promptConflict(`${type}/${resource.name}`, resource.content, storeContent, "pull");
+        : await promptConflict(`${type}/${resource.name}`, converted, storeContent, "pull");
       if (choice === "skip") continue;
       if (choice === "keep-store") {
         log.info(`${type}/${resource.name}: kept store version`);
@@ -111,8 +120,8 @@ async function pullFileResources(
 
     log.success(`${type}/${resource.name}: pulled`);
     if (!options.dryRun) {
-      writeFileEnsuringDir(storePath, resource.content);
-      ensureSymlink(toolPath, storePath);
+      writeFileEnsuringDir(storePath, converted);
+      if (!conversion) ensureSymlink(toolPath, storePath);
     }
   }
 }
@@ -223,31 +232,59 @@ async function pushFileResources(
     log.skip(`${type}: nothing in store to push`);
     return;
   }
+  const conversion = type === "commands" ? adapter.commandsConversion : undefined;
   for (const name of names) {
     const storePath = join(storeDir, `${name}.md`);
     const toolPath = type === "agents" ? adapter.agentPath(name) : adapter.commandPath(name);
+    const storeContent = readFileSync(storePath, "utf8");
 
-    if (isSymlinkTo(toolPath, storePath)) {
-      log.skip(`${type}/${name}: already synced`);
+    if (!conversion) {
+      if (isSymlinkTo(toolPath, storePath)) {
+        log.skip(`${type}/${name}: already synced`);
+        continue;
+      }
+      if (existsSync(toolPath) && !lstatSync(toolPath).isSymbolicLink()) {
+        const toolContent = readFileSync(toolPath, "utf8");
+        if (hashContent(toolContent) !== hashContent(storeContent)) {
+          const choice = options.yes
+            ? "keep-store"
+            : await promptConflict(`${type}/${name}`, toolContent, storeContent, "push");
+          if (choice === "skip") continue;
+          if (choice === "keep-tool") {
+            log.info(`${type}/${name}: kept tool version, updating store`);
+            if (!options.dryRun) writeFileEnsuringDir(storePath, toolContent);
+            continue;
+          }
+        }
+      }
+      log.success(`${type}/${name}: pushed`);
+      if (!options.dryRun) ensureSymlink(toolPath, storePath);
       continue;
     }
-    if (existsSync(toolPath) && !lstatSync(toolPath).isSymbolicLink()) {
+
+    // Conversion path (e.g. Gemini TOML commands): the tool's on-disk shape
+    // differs from the store's markdown, so materialize an independent
+    // native-format file instead of a symlink, comparing content by
+    // converting the tool's file back to store shape first.
+    if (existsSync(toolPath)) {
       const toolContent = readFileSync(toolPath, "utf8");
-      const storeContent = readFileSync(storePath, "utf8");
-      if (hashContent(toolContent) !== hashContent(storeContent)) {
-        const choice = options.yes
-          ? "keep-store"
-          : await promptConflict(`${type}/${name}`, toolContent, storeContent, "push");
-        if (choice === "skip") continue;
-        if (choice === "keep-tool") {
-          log.info(`${type}/${name}: kept tool version, updating store`);
-          if (!options.dryRun) writeFileEnsuringDir(storePath, toolContent);
-          continue;
-        }
+      const toolAsStore = conversion.toStore(toolContent);
+      if (hashContent(toolAsStore) === hashContent(storeContent)) {
+        log.skip(`${type}/${name}: already synced`);
+        continue;
+      }
+      const choice = options.yes
+        ? "keep-store"
+        : await promptConflict(`${type}/${name}`, toolAsStore, storeContent, "push");
+      if (choice === "skip") continue;
+      if (choice === "keep-tool") {
+        log.info(`${type}/${name}: kept tool version, updating store`);
+        if (!options.dryRun) writeFileEnsuringDir(storePath, toolAsStore);
+        continue;
       }
     }
     log.success(`${type}/${name}: pushed`);
-    if (!options.dryRun) ensureSymlink(toolPath, storePath);
+    if (!options.dryRun) writeFileEnsuringDir(toolPath, conversion.toNative(storeContent));
   }
 }
 

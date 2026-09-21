@@ -52,8 +52,9 @@ describe("claude adapter", () => {
 });
 
 describe("gemini adapter", () => {
-  test("reads mcp servers, agents, skills, instructions (no commands)", async () => {
+  test("reads mcp servers, agents, skills, instructions, commands", async () => {
     mkdirSync(join(fakeHome, ".gemini", "agents"), { recursive: true });
+    mkdirSync(join(fakeHome, ".gemini", "commands"), { recursive: true });
     mkdirSync(join(fakeHome, ".gemini", "skills", "demo-skill"), { recursive: true });
     writeFileSync(
       join(fakeHome, ".gemini", "settings.json"),
@@ -62,9 +63,13 @@ describe("gemini adapter", () => {
     writeFileSync(join(fakeHome, ".gemini", "agents", "reviewer.md"), "---\nname: reviewer\n---\nbody");
     writeFileSync(join(fakeHome, ".gemini", "skills", "demo-skill", "SKILL.md"), "---\nname: demo-skill\n---\nbody");
     writeFileSync(join(fakeHome, ".gemini", "GEMINI.md"), "# notes");
+    writeFileSync(
+      join(fakeHome, ".gemini", "commands", "greet.toml"),
+      'description = "Greet someone"\nprompt = "Say hi to {{args}}."\n',
+    );
 
     const adapter = getAdapter("gemini");
-    expect(adapter.capabilities.commands).toBe(false);
+    expect(adapter.capabilities.commands).toBe(true);
 
     const mcp = await adapter.readMcpServers();
     expect(mcp["context7"]).toBeDefined();
@@ -77,6 +82,32 @@ describe("gemini adapter", () => {
 
     const instructions = readFileSync(adapter.instructionsPath(), "utf8");
     expect(instructions).toContain("# notes");
+
+    const commands = await adapter.listCommands();
+    expect(commands.map((c) => c.name)).toEqual(["greet"]);
+    expect(adapter.commandPath("greet")).toBe(join(fakeHome, ".gemini", "commands", "greet.toml"));
+  });
+});
+
+describe("gemini command TOML/markdown conversion", () => {
+  test("round-trips description + {{args}} <-> $ARGUMENTS through the store's markdown shape", () => {
+    const adapter = getAdapter("gemini");
+    const toml = 'description = "Greet someone"\nprompt = "Say hi to {{args}}."\n';
+
+    const storeMd = adapter.commandsConversion!.toStore(toml);
+    expect(storeMd).toContain("description: ");
+    expect(storeMd).toContain("Say hi to $ARGUMENTS.");
+
+    const nativeAgain = adapter.commandsConversion!.toNative(storeMd);
+    expect(nativeAgain).toContain('description = "Greet someone"');
+    expect(nativeAgain).toContain("Say hi to {{args}}.");
+  });
+
+  test("converts a plain (no-frontmatter) store command into TOML with no description", () => {
+    const adapter = getAdapter("gemini");
+    const native = adapter.commandsConversion!.toNative("Just do the thing with $ARGUMENTS.\n");
+    expect(native).not.toContain("description");
+    expect(native).toContain("Just do the thing with {{args}}.");
   });
 });
 

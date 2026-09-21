@@ -19,12 +19,18 @@ export function hashContent(content: string): string {
   return createHash("sha256").update(content).digest("hex");
 }
 
+/** List file resource names (without extension) matching `ext` in a directory, or [] if it doesn't exist. */
+export function listFilesWithExt(dirPath: string, ext: string): string[] {
+  if (!existsSync(dirPath)) return [];
+  const suffix = `.${ext}`;
+  return readdirSync(dirPath)
+    .filter((f) => f.endsWith(suffix))
+    .map((f) => f.slice(0, -suffix.length));
+}
+
 /** List `*.md` file resource names (without extension) in a directory, or [] if it doesn't exist. */
 export function listMarkdownFiles(dirPath: string): string[] {
-  if (!existsSync(dirPath)) return [];
-  return readdirSync(dirPath)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => f.slice(0, -3));
+  return listFilesWithExt(dirPath, "md");
 }
 
 /** List subdirectory names (skills) in a directory, or [] if it doesn't exist. */

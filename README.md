@@ -63,7 +63,7 @@ Flags on `pull`/`push`/`update`:
 | **Claude Code** | `~/.claude.json` → `mcpServers` | `~/.claude/agents/*.md` | `~/.claude/commands/*.md` | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/CLAUDE.md` |
 | **Codex CLI** | `~/.codex/config.toml` → `[mcp_servers.<name>]` | ❌ | `~/.codex/prompts/*.md` | ❌ | `~/.codex/AGENTS.md` |
 | **Copilot CLI** | `~/.copilot/mcp-config.json` → `mcpServers` | `~/.copilot/agents/<name>/AGENT.md` | ❌ | `~/.copilot/skills/<name>/SKILL.md` | `~/.copilot/copilot-instructions.md` |
-| **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` | `~/.gemini/agents/*.md` | ❌ (`.toml` format, not yet synced) | `~/.gemini/skills/<name>/SKILL.md` | `~/.gemini/GEMINI.md` |
+| **Gemini CLI** | `~/.gemini/settings.json` → `mcpServers` | `~/.gemini/agents/*.md` | `~/.gemini/commands/*.toml` (converted) | `~/.gemini/skills/<name>/SKILL.md` | `~/.gemini/GEMINI.md` |
 | **OpenCode** | `~/.config/opencode/opencode.json` → `mcp` | `~/.config/opencode/agent/*.md` | `~/.config/opencode/command/*.md` | `~/.config/opencode/skill/<name>/SKILL.md` | `~/.config/opencode/AGENTS.md` |
 | **Cursor** | `~/.cursor/mcp.json` → `mcpServers` | ❌ | ❌ | ❌ | ❌ (no confirmed global file) |
 
@@ -75,6 +75,15 @@ of failing.
 OpenCode's MCP entries use a different shape (`{type, command, environment}`)
 than the others (`{command, args, env}`); agentsync converts between them
 automatically.
+
+Gemini's slash commands are TOML (`description`/`prompt` fields, with
+`{{args}}` for argument substitution) instead of the store's Markdown
+(frontmatter `description:` + a prompt body using `$ARGUMENTS`). agentsync
+converts between the two formats automatically, so a command pulled from
+Claude Code can be pushed to Gemini and vice versa. Because the on-disk
+formats differ, these commands are synced as independently-written files
+(not symlinks) — content is compared after normalizing both sides to the
+same shape, so re-running `pull`/`push` won't report false conflicts.
 
 ## Pulling from a GitHub repo
 
