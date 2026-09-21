@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { listMarkdownResources, listSkillResources, markdownResourcePath, skillResourcePath } from "./common";
 import { home } from "./home";
@@ -9,7 +10,16 @@ const claudeDir = () => join(home(), ".claude");
 const agentsDir = () => join(claudeDir(), "agents");
 const commandsDir = () => join(claudeDir(), "commands");
 const skillsDir = () => join(claudeDir(), "skills");
-const instructionsFile = () => join(claudeDir(), "CLAUDE.md");
+/**
+ * Claude Code now prefers AGENTS.md (CLAUDE.md is still supported). Use
+ * AGENTS.md if it already exists, otherwise fall back to an existing
+ * CLAUDE.md; if neither exists yet, default to the new AGENTS.md name.
+ */
+const instructionsFile = () => {
+  const agentsMd = join(claudeDir(), "AGENTS.md");
+  const claudeMd = join(claudeDir(), "CLAUDE.md");
+  return existsSync(claudeMd) && !existsSync(agentsMd) ? claudeMd : agentsMd;
+};
 
 export const claudeAdapter: ToolAdapter = {
   id: "claude",
