@@ -1,0 +1,29 @@
+{
+  "name": "agentsync",
+  "description": "Sync MCP servers, subagents, slash commands, skills, and instructions between AI coding tools (Claude Code, Codex, Copilot CLI, Gemini CLI, OpenCode, Cursor)",
+  "module": "src/cli.ts",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "agentsync": "./src/cli.ts"
+  },
+  "scripts": {
+    "start": "bun run src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/diff": "^8.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "@inquirer/prompts": "^8.7.2",
+    "commander": "^15.0.0",
+    "diff": "^9.0.0",
+    "picocolors": "^1.1.1"
+  }
+}
