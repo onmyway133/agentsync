@@ -43,6 +43,7 @@ program
   .description("Re-pull from one or all registered sources")
   .option("--dry-run", "show what would change without writing anything")
   .option("--yes", "don't prompt on conflicts")
+  .option("--type <types>", "comma-separated resource types: mcp,agents,commands,skills,instructions")
   .action((source: string | undefined, opts) => runUpdate(source, opts));
 
 program

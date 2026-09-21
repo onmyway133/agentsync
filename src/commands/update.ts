@@ -1,3 +1,4 @@
+import type { ResourceType } from "../adapters/types";
 import { getAdapter } from "../adapters";
 import { pullFromGithub } from "../sources/github";
 import { readSources } from "../store/manifest";
@@ -19,11 +20,13 @@ export async function runUpdate(sourceId: string | undefined, flags: PullFlags):
     return;
   }
 
+  const types = flags.type ? (flags.type.split(",") as ResourceType[]) : undefined;
+
   for (const source of targets) {
     if (source.type === "github") {
       await pullFromGithub(source.id, { dryRun: flags.dryRun, ref: source.ref });
     } else {
-      await pullFromTool(getAdapter(source.id), { dryRun: flags.dryRun, yes: flags.yes });
+      await pullFromTool(getAdapter(source.id), { dryRun: flags.dryRun, yes: flags.yes, types });
     }
   }
 }
