@@ -91,33 +91,6 @@ formats differ, these commands are synced as independently-written files
 (not symlinks) — content is compared after normalizing both sides to the
 same shape, so re-running `pull`/`push` won't report false conflicts.
 
-## Pulling from a GitHub repo
-
-```sh
-agentsync pull github:owner/repo
-agentsync pull https://github.com/owner/repo
-agentsync pull https://github.com/owner/repo/tree/some-branch
-agentsync pull git@github.com:owner/repo.git
-```
-
-All of these forms are accepted and normalized to `owner/repo` (plus an
-optional branch/ref) before cloning. Expects the repo to already be laid out
-like a Claude Code config: `agents/`, `commands/`, `skills/`, a `.mcp.json` or
-`mcp-servers.json`, and an optional `CLAUDE.md`/`AGENTS.md`. Useful for
-pulling in someone else's published agents/commands/skills collection.
-
-## Finding installed tools
-
-```sh
-agentsync scan
-```
-
-Looks for known config locations (`~/.claude`, `~/.codex`, `~/.copilot`,
-`~/.gemini`, `~/.config/opencode`, `~/.cursor`) and reports which tools are
-installed, how many resources of each type they hold, and whether they're
-already registered as an agentsync source — a quick way to see what you could
-`agentsync pull` next.
-
 ## Development
 
 ```sh
