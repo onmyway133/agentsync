@@ -137,7 +137,11 @@ async function pullSkills(adapter: ToolAdapter, options: SyncOptions): Promise<v
     log.success(`skills/${skill.name}: pulled`);
     if (!options.dryRun) {
       const { cpSync, rmSync } = await import("node:fs");
-      cpSync(skill.dirPath, storeDir, { recursive: true });
+      // dereference: true so a skill dir that is itself a symlink (e.g. npx
+      // skills' ~/.claude/skills/<name> -> ~/.agents/skills/<name>) is
+      // copied by real content, not re-created as a symlink whose relative
+      // target would resolve incorrectly from the store's location.
+      cpSync(skill.dirPath, storeDir, { recursive: true, dereference: true });
       rmSync(skill.dirPath, { recursive: true, force: true });
       ensureSymlink(skill.dirPath, storeDir);
     }
